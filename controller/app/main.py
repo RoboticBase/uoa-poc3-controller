@@ -6,7 +6,7 @@ from logging import getLogger
 
 from flask import Flask
 
-from src import const, errors
+from src import api, const, errors
 
 try:
     with open(const.LOGGING_JSON, "r") as f:
@@ -22,6 +22,9 @@ except FileNotFoundError:
 
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
+
+planner = api.StaticRoutePlanner.as_view(api.StaticRoutePlanner.NAME)
+app.add_url_rule('/api/v1/planning', view_func=planner, methods=['POST', ])
 
 app.register_blueprint(errors.app)
 
