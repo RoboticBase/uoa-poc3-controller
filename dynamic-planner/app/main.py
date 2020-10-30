@@ -35,7 +35,9 @@ for node in nodes.values():
 potential = Potential(size, const.ERROR_MARGIN)
 
 planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME, potential, size, nodes, edges)
+potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential)
 app.add_url_rule('/api/v1/planning', view_func=planner, methods=['POST', ])
+app.add_url_rule('/api/v1/potentials', view_func=potential_viewer, methods=['GET', ])
 
 app.register_blueprint(errors.app)
 

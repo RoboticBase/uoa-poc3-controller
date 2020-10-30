@@ -1,10 +1,13 @@
 import datetime
+import io
 import json
 
 from logging import getLogger
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, make_response
 from flask.views import MethodView
+
+from PIL import Image
 
 from src import const, orion
 from src.fast_astar import FastAstar
@@ -105,3 +108,23 @@ class DynamicRoutePlanner(MethodView):
             }
         }
         return payload
+
+
+class PotentialViewer(MethodView):
+    NAME = 'potential_viewer'
+
+    def __init__(self, potential):
+        super().__init__()
+        self.potential = potential
+
+    def get(self):
+        logger.debug('PotentialViewer.get')
+
+        output = io.BytesIO()
+        Image.fromarray(self.potential.current_field).save(output, format='JPEG')
+
+        response = make_response()
+        response.data = output.getvalue()
+        response.mimetype = 'image/jpeg'
+
+        return response
