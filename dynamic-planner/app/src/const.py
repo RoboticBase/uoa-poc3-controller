@@ -9,7 +9,8 @@ TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'UTC'))
 ORION_ENDPOINT = os.environ['ORION_ENDPOINT']
 FIWARE_SERVICE = os.environ['FIWARE_SERVICE']
 FIWARE_SERVICEPATH = os.environ['FIWARE_SERVICEPATH']
-ERROR_MARGIN = 8
+ERROR_MARGIN = 1.1
+CHECK_WP_LENGTH = 3
 GRAPH_MODULE = 'graph.lictia'
 COSTMAP_METADATA = {
     "resolution": 0.05,

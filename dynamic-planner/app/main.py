@@ -32,12 +32,14 @@ edges = graph.EDGES
 for node in nodes.values():
     node.edges = [edge for edge in edges if edge.st == node or edge.ed == node]
 
-potential = Potential(size, const.ERROR_MARGIN)
+potential = Potential(size)
 
 planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME, potential, size, nodes, edges)
 potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential)
+pose_notifiee = api.PoseNotifiee.as_view(api.PoseNotifiee.NAME, potential)
 app.add_url_rule('/api/v1/planning', view_func=planner, methods=['POST', ])
 app.add_url_rule('/api/v1/potentials', view_func=potential_viewer, methods=['GET', ])
+app.add_url_rule('/api/v1/notifications/pose', view_func=pose_notifiee, methods=['POST', ])
 
 app.register_blueprint(errors.app)
 
