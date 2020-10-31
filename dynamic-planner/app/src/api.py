@@ -35,9 +35,11 @@ class DynamicRoutePlanner(MethodView):
         body = request.json
 
         if body is None or body.get('robotId') is None or body.get('startNode') is None or body.get('destNode') is None:
+            msg = f'"robotId" and/or "startNode" and/or "destNode" do not exist, body={body}'
+            logger.warning(f'status=400, {msg}')
             abort(400, {
                 'result': 'failure',
-                'message': f'"robotId" and/or "startNode" and/or "destNode" do not exist, body={body}',
+                'message': msg,
             })
 
         robot_id = body['robotId']
@@ -46,25 +48,30 @@ class DynamicRoutePlanner(MethodView):
         dest_angle = body.get('destAngle')
 
         if self.potential.has_potential(robot_id):
+            msg = f'this robot ({robot_id}) already has potential'
+            logger.warning(f'status=409, {msg}')
             return jsonify({
                 'result': 'failure',
-                'message': f'this robot ({robot_id}) already has potential'
+                'message': msg,
             }), 409
 
         entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id)
         if 'robotSize' not in entity or 'inflation_radius' not in entity['robotSize']['value']:
-            return jsonify({
-                'result': 'failure',
-                'message': f'the "robotSize" of {robot_id} has not been initialized yet'
-            }), 409
-        inflation_radius = float(entity['robotSize']['value']['inflation_radius'])
+            msg = f'the "robotSize" of {robot_id} has not been initialized yet.' \
+                  f'use default inflation_radius ({const.DEFAULT_INFLATION_RADIUS})'
+            logger.warning(f'{msg}')
+            inflation_radius = const.DEFAULT_INFLATION_RADIUS
+        else:
+            inflation_radius = float(entity['robotSize']['value']['inflation_radius'])
 
         req = Req(robot_id, start_node, dest_node, dest_angle, inflation_radius)
         self.req_queue.put(req)
 
+        msg = f'enqueued this request, {req}'
+        logger.info(f'status=200, {msg}')
         return jsonify({
             'result': 'success',
-            'message': f'enqueued this request, {req}'
+            'message': msg,
         })
 
     def _exec(self):
@@ -173,8 +180,11 @@ class PoseNotifiee(MethodView):
                 robot_id = data['id']
                 c_x = data['pose']['value']['point']['x']
                 c_y = data['pose']['value']['point']['y']
-                r = data.get('robotSize', {}).get('value', {}).get('inflation_radius', const.DEFAULT_INFLATION_RADIUS)
-                passed = self.potential.notify_pos(robot_id, c_x, c_y, r)
+                if 'robotSize' not in data or 'inflation_radius' not in data['robotSize']['value']:
+                    inflation_radius = const.DEFAULT_INFLATION_RADIUS
+                else:
+                    inflation_radius = float(data['robotSize']['value']['inflation_radius'])
+                passed = self.potential.notify_pos(robot_id, c_x, c_y, inflation_radius)
                 logger.info(f'passed waypoints = {passed}')
 
         return jsonify({'result': 'success', 'passedWaypointNum': 0 if passed is None else len(passed)}), 200
