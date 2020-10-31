@@ -1,16 +1,18 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 MAINTAINER Nobuyuki Matsui <nobuyuki.matsui@gmail.com>
 
 ARG LISTEN_PORT
 ENV LISTEN_PORT ${LISTEN_PORT:-3000}
+ENV LIBRARY_PATH=/lib:/usr/lib
 
 COPY ./app /opt/app
 
 WORKDIR /opt/app
 
 RUN apk update && \
-    apk add --no-cache nginx supervisor && \
+    apk add --no-cache nginx supervisor jpeg-dev zlib-dev && \
     apk add --no-cache --virtual .build python3-dev build-base linux-headers pcre-dev && \
+    pip install --upgrade pip && \
     pip install pipenv uwsgi~=2.0 && \
     pipenv install --system && \
     rm /etc/nginx/nginx.conf && \
