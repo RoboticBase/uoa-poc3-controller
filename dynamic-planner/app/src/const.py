@@ -40,6 +40,7 @@ MODE_NAVI = 'navi'
 MODE_STAQNDBY = 'standby'
 MODE_ERROR = 'error'
 MODE_UNKNOWN = 'unknown'
+DEFAULT_INFLATION_RADIUS = 0.5
 
 # logging
 LOGGING_JSON = 'logging.json'

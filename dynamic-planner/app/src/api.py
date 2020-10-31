@@ -57,7 +57,7 @@ class DynamicRoutePlanner(MethodView):
             self.graph_size,
             radius)
         searched_path = fast_astar.calculate(self.potential.current_field)
-        self.potential.register(robot_id, searched_path, radius, infration_radius)
+        self.potential.register(robot_id, searched_path, radius)
 
         payload = self._make_cmd(infration_radius, searched_path, dest_angle)
 
@@ -149,8 +149,8 @@ class PoseNotifiee(MethodView):
                 robot_id = data['id']
                 c_x = data['pose']['value']['point']['x']
                 c_y = data['pose']['value']['point']['y']
-
-                passed = self.potential.notify_pos(robot_id, c_x, c_y)
+                r = data.get('robotSize', {}).get('value', {}).get('inflation_radius', const.DEFAULT_INFLATION_RADIUS)
+                passed = self.potential.notify_pos(robot_id, c_x, c_y, r)
                 logger.info(f'passed waypoints = {passed}')
 
         return jsonify({'result': 'success', 'passedWaypointNum': 0 if passed is None else len(passed)}), 200

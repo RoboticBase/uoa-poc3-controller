@@ -35,7 +35,7 @@ curl -i -H "Fiware-Service: ${FIWARE_SERVICE}" -H "Fiware-ServicePath: ${FIWARE_
     "http": {
       "url": "http://host.docker.internal:3000/api/v1/notifications/pose"
     },
-    "attrs": ["pose"]
+    "attrs": ["pose", "robotSize"]
   }
 }
 __EOS__
