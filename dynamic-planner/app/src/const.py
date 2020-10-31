@@ -1,4 +1,5 @@
 import os
+import json
 
 import pytz
 
@@ -9,28 +10,12 @@ TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'UTC'))
 ORION_ENDPOINT = os.environ['ORION_ENDPOINT']
 FIWARE_SERVICE = os.environ['FIWARE_SERVICE']
 FIWARE_SERVICEPATH = os.environ['FIWARE_SERVICEPATH']
-ERROR_MARGIN = 1.1
-CHECK_WP_LENGTH = 3
-GRAPH_MODULE = 'graph.lictia'
-COSTMAP_METADATA = {
-    "resolution": 0.05,
-    "width": 749,
-    "height": 531,
-    "origin": {
-        "point": {
-            "x": -19.3,
-            "y": -20,
-            "z": 0
-        },
-        "angle": {
-            "roll": 0,
-            "pitch": 0,
-            "yaw": 0
-        }
-    }
-}
-MODE_CHANGE_COUNT = 3
-RETRY_QUEUE_WAIT_SEC = 1
+GRAPH_MODULE = os.environ['GRAPH_MODULE']
+COSTMAP_METADATA = json.loads(os.environ['COSTMAP_METADATA'])
+ERROR_MARGIN = float(os.environ.get('ERROR_MARGIN', '1.1'))
+CHECK_WP_LENGTH = int(os.environ.get('CHECK_WP_LENGTH', '3'))
+MODE_CHANGE_COUNT = int(os.environ.get('MODE_CHANGE_COUNT', '3'))
+RETRY_QUEUE_WAIT_SEC = int(os.environ.get('RETRY_QUEUE_QAIT_SEC', '1'))
 
 # constants
 ORION_BASE_PATH = '/v2/entities/'
