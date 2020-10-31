@@ -85,3 +85,6 @@ class Potential:
     def deregister(self, id):
         if id in self.potentials:
             del self.potentials[id]
+
+    def has_potential(self, id):
+        return id in self.potentials and len(self.potentials[id]['path']) > 0

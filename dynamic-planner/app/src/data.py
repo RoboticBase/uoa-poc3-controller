@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, auto
 
 from src import const
 
@@ -31,6 +31,21 @@ class Edge:
 
     def get_opposite_node(self, node):
         return self.ed if self.st == node else self.st
+
+
+class ReqState(Enum):
+    NEW = auto()
+    RETRY = auto()
+
+
+@dataclass
+class Req:
+    robot_id: str
+    start_node: str
+    dest_node: str
+    dest_angle: str
+    inflation_radius: float
+    state: ReqState = ReqState.NEW
 
 
 class Mode(Enum):

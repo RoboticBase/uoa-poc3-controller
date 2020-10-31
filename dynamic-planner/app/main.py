@@ -4,6 +4,7 @@ import os
 import logging.config
 from logging import getLogger
 from importlib import import_module
+from queue import Queue
 
 from flask import Flask
 
@@ -34,8 +35,9 @@ for node in nodes.values():
 
 potential = Potential(size)
 state_holder = {}
+req_queue = Queue()
 
-planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME, potential, size, nodes, edges)
+planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME, potential, req_queue, size, nodes, edges)
 potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential)
 pose_notifiee = api.PoseNotifiee.as_view(api.PoseNotifiee.NAME, potential)
 mode_notifiee = api.ModeNotifiee.as_view(api.ModeNotifiee.NAME, potential, state_holder)

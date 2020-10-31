@@ -1,6 +1,8 @@
 import datetime
 import io
 import json
+import threading
+import time
 
 from logging import getLogger
 
@@ -11,7 +13,7 @@ from PIL import Image
 
 from src import const, orion
 from src.fast_astar import FastAstar
-from src.data import Mode, State
+from src.data import ReqState, Req, Mode, State
 
 logger = getLogger(__name__)
 
@@ -19,12 +21,14 @@ logger = getLogger(__name__)
 class DynamicRoutePlanner(MethodView):
     NAME = 'dynamic_route_planner'
 
-    def __init__(self, potential, graph_size, nodes, edges):
+    def __init__(self, potential, req_queue, graph_size, nodes, edges):
         super().__init__()
         self.potential = potential
+        self.req_queue = req_queue
         self.graph_size = graph_size
         self.nodes = nodes
         self.edges = edges
+        threading.Thread(target=self._exec).start()
 
     def post(self):
         logger.debug('DynamicRoutePlanner.post')
@@ -32,6 +36,7 @@ class DynamicRoutePlanner(MethodView):
 
         if body is None or body.get('robotId') is None or body.get('startNode') is None or body.get('destNode') is None:
             abort(400, {
+                'result': 'failure',
                 'message': f'"robotId" and/or "startNode" and/or "destNode" do not exist, body={body}',
             })
 
@@ -40,41 +45,60 @@ class DynamicRoutePlanner(MethodView):
         dest_node = body['destNode']
         dest_angle = body.get('destAngle')
 
+        if self.potential.has_potential(robot_id):
+            return jsonify({
+                'result': 'failure',
+                'message': f'this robot ({robot_id}) already has potential'
+            }), 409
+
         entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id)
         if 'robotSize' not in entity or 'inflation_radius' not in entity['robotSize']['value']:
             return jsonify({
                 'result': 'failure',
                 'message': f'the "robotSize" of {robot_id} has not been initialized yet'
             }), 409
+        inflation_radius = float(entity['robotSize']['value']['inflation_radius'])
 
-        infration_radius = float(entity['robotSize']['value']['inflation_radius'])
-        radius = infration_radius/float(const.COSTMAP_METADATA['resolution'])
-
-        fast_astar = FastAstar(
-            self.nodes[start_node],
-            self.nodes[dest_node],
-            list(self.nodes.values()),
-            self.graph_size,
-            radius)
-        searched_path = fast_astar.calculate(self.potential.current_field)
-        self.potential.register(robot_id, searched_path, radius)
-
-        payload = self._make_cmd(infration_radius, searched_path, dest_angle)
-
-        result = orion.send_command(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id, payload)
-        logger.info(f'send a "{const.START_COMMAND}" command to orion, '
-                    f'result_status={result.status_code}, payload={json.dumps(payload)}')
+        req = Req(robot_id, start_node, dest_node, dest_angle, inflation_radius)
+        self.req_queue.put(req)
 
         return jsonify({
             'result': 'success',
-            'robotId': robot_id,
-            'startNode': start_node,
-            'destNode': dest_node,
-            'destAngle': dest_angle,
-            'orion_status': result.status_code,
-        }), 201
+            'message': f'enqueued this request, {req}'
+        })
 
-    def _make_cmd(self, infration_radius, waypoints, dest_angle):
+    def _exec(self):
+        while True:
+            req = self.req_queue.get()
+            logger.debug(f'DynamicRoutePlanner._exec, queue_length={self.req_queue.qsize()} req={req}')
+            if req.state == ReqState.RETRY:
+                time.sleep(const.RETRY_QUEUE_WAIT_SEC)
+
+            radius = req.inflation_radius/float(const.COSTMAP_METADATA['resolution'])
+
+            fast_astar = FastAstar(
+                self.nodes[req.start_node],
+                self.nodes[req.dest_node],
+                list(self.nodes.values()),
+                self.graph_size,
+                radius)
+
+            searched_path = fast_astar.calculate(self.potential.current_field)
+
+            if not searched_path:
+                req.state = ReqState.RETRY
+                self.req_queue.put(req)
+                continue
+
+            self.potential.register(req.robot_id, searched_path, radius)
+
+            payload = self._make_cmd(req.inflation_radius, searched_path, req.dest_angle)
+
+            result = orion.send_command(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, req.robot_id, payload)
+            logger.info(f'send a "{const.START_COMMAND}" command to orion, '
+                        f'result_status={result.status_code}, payload={json.dumps(payload)}')
+
+    def _make_cmd(self, inflation_radius, waypoints, dest_angle):
         t = datetime.datetime.now(const.TIMEZONE).isoformat(timespec='milliseconds')
 
         payload = {
@@ -84,7 +108,7 @@ class DynamicRoutePlanner(MethodView):
                     'time': t,
                     'command': const.START_COMMAND,
                     'metadata': {
-                        'inflation_radius': infration_radius,
+                        'inflation_radius': inflation_radius,
                         'costmap': const.COSTMAP_METADATA,
                     },
                     'waypoints': [{

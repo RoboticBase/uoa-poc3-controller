@@ -3,7 +3,6 @@
 export FIWARE_SERVICE="demoservice"
 export FIWARE_SERVICEPATH="/demo/path"
 export type=robot
-export id=robot01
 
 # register service
 curl -i "http://localhost:4041/iot/services/" \
@@ -28,17 +27,35 @@ curl -sS "http://localhost:4041/iot/services/" \
      -H "Fiware-Service: ${FIWARE_SERVICE}" \
      -H "Fiware-ServicePath: ${FIWARE_SERVICEPATH}"
 
-# register device
-curl -i "http://localhost:4041/iot/devices/" \
-     -H "Fiware-Service: ${FIWARE_SERVICE}" \
-     -H "Fiware-ServicePath: ${FIWARE_SERVICEPATH}" \
-     -H "Content-Type: application/json" \
-     -X POST -d @- <<__EOS__
+ROBOTS=$(cat << __EOD__
+[
+  {
+    "id": "robot01"
+  },
+  {
+    "id": "robot02"
+  }
+]
+__EOD__
+)
+
+# register devices
+LEN=$(echo ${ROBOTS} | jq length)
+count=0
+if [ ${LEN} -gt 0 ]; then
+  for i in $(seq 0 $((${LEN} - 1))); do
+    robot_id=$(echo ${ROBOTS} | jq -r .[${i}].id)
+    echo "${robot_id} will be registered."
+    curl -i "http://localhost:4041/iot/devices/" \
+         -H "Fiware-Service: ${FIWARE_SERVICE}" \
+         -H "Fiware-ServicePath: ${FIWARE_SERVICEPATH}" \
+         -H "Content-Type: application/json" \
+         -X POST -d @- <<__EOS__
 {
   "devices": [
     {
-      "device_id": "${id}",
-      "entity_name": "${id}",
+      "device_id": "${robot_id}",
+      "entity_name": "${robot_id}",
       "entity_type": "${type}",
       "timezone": "Asia/Tokyo",
       "protocol": "json",
@@ -91,18 +108,21 @@ curl -i "http://localhost:4041/iot/devices/" \
         }
       ],
       "transport": "HTTP",
-      "endpoint": "http://amqp10-converter:3000/amqp10/cmd/${type}/${id}"
+      "endpoint": "http://amqp10-converter:3000/amqp10/cmd/${type}/${robot_id}"
     }
   ]
 }
 __EOS__
-
+    let ++count
+  done
+fi
+echo "${count} devices were registered."
 
 # retrieve device
-curl -sS "http://localhost:4041/iot/devices/${id}" \
+curl -sS "http://localhost:4041/iot/devices" \
      -H "Fiware-Service: ${FIWARE_SERVICE}" \
      -H "Fiware-ServicePath: ${FIWARE_SERVICEPATH}"
 
-curl -sS "http://localhost:1026/v2/entities/${id}?type=${type}" \
+curl -sS "http://localhost:1026/v2/entities?type=${type}" \
      -H "Fiware-Service: ${FIWARE_SERVICE}" \
      -H "Fiware-ServicePath: ${FIWARE_SERVICEPATH}"

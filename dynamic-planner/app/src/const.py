@@ -30,6 +30,7 @@ COSTMAP_METADATA = {
     }
 }
 MODE_CHANGE_COUNT = 3
+RETRY_QUEUE_WAIT_SEC = 1
 
 # constants
 ORION_BASE_PATH = '/v2/entities/'
