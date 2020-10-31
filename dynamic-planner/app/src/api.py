@@ -3,6 +3,7 @@ import io
 import json
 import threading
 import time
+from textwrap import dedent
 
 from logging import getLogger
 
@@ -13,7 +14,8 @@ from PIL import Image
 
 from src import const, orion
 from src.fast_astar import FastAstar
-from src.data import ReqState, Req, Mode, State
+from src.grid_generator import Grid
+from src.data import ReqState, Req, Mode, State, Node
 
 logger = getLogger(__name__)
 
@@ -214,3 +216,63 @@ class ModeNotifiee(MethodView):
                     logger.debug(f'deregister potential of {robot_id}')
 
         return jsonify({'result': 'success'}), 200
+
+
+class GraphGenerator(MethodView):
+    NAME = 'graph_generator'
+
+    TEMPLATE = """
+    from src.data import Node, Edge
+
+    SIZE = {size}
+
+    NODES = {nodes}
+
+    EDGES = {edges}
+    """
+
+    def post(self):
+        if 'map_pgm' not in request.files:
+            msg = 'map_pgm does not exist'
+            logger.warning(msg)
+            return jsonify({
+                'result': 'failure',
+                'message': msg,
+            }), 400
+        map_pgm = request.files['map_pgm']
+
+        if 'metadata_json' not in request.files:
+            msg = 'yaml_file does not exist'
+            logger.warning(msg)
+            return jsonify({
+                'result': 'failure',
+                'message': msg,
+            }), 400
+        metadata_json = request.files['metadata_json']
+
+        u_length_m = float(request.form['u_length_m']) if 'u_length_m' in request.form else const.DEFAULT_UNIT_LENGTH
+
+        grid = Grid(map_pgm, metadata_json, u_length_m)
+        graph = grid.build_graph()
+
+        nodes = {f'N{i:04}': Node(x=vertex.pixel[0], y=vertex.pixel[1], c_x=vertex.converted[0], c_y=vertex.converted[1])
+                 for i, vertex in enumerate(graph.keys())}
+
+        raw_edges = list()
+        for current, neighbors in graph.items():
+            for neighbor in neighbors:
+                raw_edges.append(tuple(sorted((current, neighbor))))
+
+        edges = list()
+        for e in set(raw_edges):
+            edges.append(f'Edge(NODES["{self.find_node(nodes, e[0])[0]}"], NODES["{self.find_node(nodes, e[1])[0]}"])')
+
+        response = make_response()
+        response.data = dedent(GraphGenerator.TEMPLATE.format(size=grid.size, nodes=nodes, edges=f'[{",".join(edges)}]'))
+        response.mimetype = 'text/plain'
+
+        return response
+
+    def find_node(self, nodes, v):
+        return next(((k, n) for k, n in nodes.items()
+                    if n.x == v.pixel[0] and n.y == v.pixel[1] and n.c_x == v.converted[0] and n.c_y == v.converted[1]))

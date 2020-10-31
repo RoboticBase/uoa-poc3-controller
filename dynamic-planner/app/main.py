@@ -26,25 +26,32 @@ except FileNotFoundError:
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 
-graph = import_module(const.GRAPH_MODULE)
-size = graph.SIZE
-nodes = graph.NODES
-edges = graph.EDGES
-for node in nodes.values():
-    node.edges = [edge for edge in edges if edge.st == node or edge.ed == node]
+graph_generator = api.GraphGenerator.as_view(api.GraphGenerator.NAME)
+app.add_url_rule('/api/v1/graph', view_func=graph_generator, methods=['POST', ])
 
-potential = Potential(size)
-state_holder = {}
-req_queue = Queue()
+try:
+    graph = import_module(const.GRAPH_MODULE)
+    size = graph.SIZE
+    nodes = graph.NODES
+    edges = graph.EDGES
+    for node in nodes.values():
+        node.edges = [edge for edge in edges if edge.st == node or edge.ed == node]
 
-planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME, potential, req_queue, size, nodes, edges)
-potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential)
-pose_notifiee = api.PoseNotifiee.as_view(api.PoseNotifiee.NAME, potential)
-mode_notifiee = api.ModeNotifiee.as_view(api.ModeNotifiee.NAME, potential, state_holder)
-app.add_url_rule('/api/v1/planning', view_func=planner, methods=['POST', ])
-app.add_url_rule('/api/v1/potentials', view_func=potential_viewer, methods=['GET', ])
-app.add_url_rule('/api/v1/notifications/pose', view_func=pose_notifiee, methods=['POST', ])
-app.add_url_rule('/api/v1/notifications/mode', view_func=mode_notifiee, methods=['POST', ])
+    potential = Potential(size)
+    state_holder = {}
+    req_queue = Queue()
+
+    planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME, potential, req_queue, size, nodes, edges)
+    potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential)
+    pose_notifiee = api.PoseNotifiee.as_view(api.PoseNotifiee.NAME, potential)
+    mode_notifiee = api.ModeNotifiee.as_view(api.ModeNotifiee.NAME, potential, state_holder)
+    app.add_url_rule('/api/v1/planning', view_func=planner, methods=['POST', ])
+    app.add_url_rule('/api/v1/potentials', view_func=potential_viewer, methods=['GET', ])
+    app.add_url_rule('/api/v1/notifications/pose', view_func=pose_notifiee, methods=['POST', ])
+    app.add_url_rule('/api/v1/notifications/mode', view_func=mode_notifiee, methods=['POST', ])
+except ModuleNotFoundError:
+    print(f'can not load {const.GRAPH_MODULE}')
+    pass
 
 app.register_blueprint(errors.app)
 

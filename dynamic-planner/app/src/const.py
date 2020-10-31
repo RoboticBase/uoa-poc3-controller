@@ -27,6 +27,7 @@ MODE_STAQNDBY = 'standby'
 MODE_ERROR = 'error'
 MODE_UNKNOWN = 'unknown'
 DEFAULT_INFLATION_RADIUS = 0.4
+DEFAULT_UNIT_LENGTH = 0.8
 
 # logging
 LOGGING_JSON = 'logging.json'
