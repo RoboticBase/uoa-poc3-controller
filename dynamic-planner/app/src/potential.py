@@ -64,3 +64,7 @@ class Potential:
             'infration_radius': potential['infration_radius']
         }
         return passed
+
+    def deregister(self, id):
+        if id in self.potentials:
+            del self.potentials[id]

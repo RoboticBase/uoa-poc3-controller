@@ -29,12 +29,17 @@ COSTMAP_METADATA = {
         }
     }
 }
+MODE_CHANGE_COUNT = 3
 
 # constants
 ORION_BASE_PATH = '/v2/entities/'
 ORION_LIST_NUM_LIMIT = 1000
 ROBOT_TYPE = 'robot'
 START_COMMAND = 'navi'
+MODE_NAVI = 'navi'
+MODE_STAQNDBY = 'standby'
+MODE_ERROR = 'error'
+MODE_UNKNOWN = 'unknown'
 
 # logging
 LOGGING_JSON = 'logging.json'
