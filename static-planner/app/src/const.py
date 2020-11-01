@@ -9,6 +9,7 @@ TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'UTC'))
 ORION_ENDPOINT = os.environ['ORION_ENDPOINT']
 FIWARE_SERVICE = os.environ['FIWARE_SERVICE']
 FIWARE_SERVICEPATH = os.environ['FIWARE_SERVICEPATH']
+CORS_ORIGINS = os.environ.get('CORS_ORIGINS', None)
 
 # constants
 ORION_BASE_PATH = '/v2/entities/'

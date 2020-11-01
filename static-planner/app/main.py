@@ -5,6 +5,7 @@ import logging.config
 from logging import getLogger
 
 from flask import Flask
+from flask_cors import CORS
 
 from src import api, const, errors
 
@@ -21,6 +22,8 @@ except FileNotFoundError:
     pass
 
 app = Flask(__name__)
+if const.CORS_ORIGINS:
+    CORS(app, resources={r'/*': {'origins': const.CORS_ORIGINS}})
 app.config.from_pyfile('config.cfg')
 
 planner = api.StaticRoutePlanner.as_view(api.StaticRoutePlanner.NAME)

@@ -73,6 +73,7 @@ services:
       - ORION_ENDPOINT=http://orion:1026
       - FIWARE_SERVICE=demoservice
       - FIWARE_SERVICEPATH=/demo/path
+      - CORS_ORIGINS=*
 
 networks:
   fiware:
