@@ -3,6 +3,7 @@ import Vuex, { ActionContext } from 'vuex';
 
 import { ItemType, StockType, StateType, DestinationType, PayloadType } from '@/types';
 import { defaultStocks, defaultDestinations } from '@/initials';
+import { postShipment } from '@/api';
 
 Vue.use(Vuex);
 
@@ -70,9 +71,8 @@ export default new Vuex.Store({
       }
     },
 
-    postShipmentAction(context: ActionContext<StateType, StateType>, payload: PayloadType): void {
-      // FIX ME
-      payload.success();
+    postShipmentAction(_: ActionContext<StateType, StateType>, payload: PayloadType): void {
+      postShipment(payload);
     },
   },
   getters: {
