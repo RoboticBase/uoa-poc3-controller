@@ -6,6 +6,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 import Stocks from '@/views/Stocks.vue';
 import Detail from '@/views/Detail.vue';
+import Cart from '@/views/Cart.vue';
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
@@ -24,6 +25,11 @@ const routes: Array<RouteConfig> = [
     path: '/detail',
     name: 'detail',
     component: Detail
+  },
+  {
+    path: '/cart',
+    name: 'cart',
+    component: Cart
   },
 ];
 
