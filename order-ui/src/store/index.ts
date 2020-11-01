@@ -79,6 +79,7 @@ export default new Vuex.Store({
     selectedDestination: (state: StateType): DestinationType | undefined  => state.selectedDestination,
     processing: (state: StateType): boolean => state.processing,
     lastOrdered: (state: StateType): PayloadType => state.ordered.slice(-1)[0],
+    ordered: (state: StateType): Array<PayloadType> => state.ordered,
   },
   modules: {
   }

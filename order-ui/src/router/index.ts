@@ -8,6 +8,7 @@ import Stocks from '@/views/Stocks.vue';
 import Detail from '@/views/Detail.vue';
 import Cart from '@/views/Cart.vue';
 import Ordered from '@/views/Ordered.vue';
+import Histories from '@/views/Histories.vue';
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
@@ -36,6 +37,11 @@ const routes: Array<RouteConfig> = [
     path: '/ordered',
     name: 'ordered',
     component: Ordered
+  },
+  {
+    path: '/histories',
+    name: 'histories',
+    component: Histories
   },
 ];
 
