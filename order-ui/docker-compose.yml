@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  order-ui:
+    image: roboticbase/order-ui:0.0.1
+    ports:
+      - "8080:80"
+    networks:
+      - fiware
+
+networks:
+  fiware:
+    external:
+      name: static-planner_fiware
+
