@@ -34,10 +34,10 @@ export default Vue.extend({
     Header
   },
   created(): void {
-    this.listStocksAction()
+    this.listStocksAction();
   },
   computed: {
-    ...mapGetters(['stocks'])
+    ...mapGetters(['stocks']),
   },
   methods: {
     ...mapActions(['listStocksAction']),

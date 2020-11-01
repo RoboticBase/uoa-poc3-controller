@@ -1,4 +1,4 @@
-import {StockType} from '@/types'
+import {StockType} from '@/types';
 
 export const defaultStocks: Array<StockType> = [
   {
@@ -73,4 +73,4 @@ export const defaultStocks: Array<StockType> = [
     price: 110,
     reservation: 0,
   },
-]
+];

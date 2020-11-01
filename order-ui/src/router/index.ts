@@ -1,14 +1,14 @@
-import Vue from 'vue'
-import VueRouter, { RouteConfig } from 'vue-router'
-import BootstrapVue from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import Vue from 'vue';
+import VueRouter, { RouteConfig } from 'vue-router';
+import BootstrapVue from 'bootstrap-vue';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
 
-import Stocks from '@/views/Stocks.vue'
-import Detail from '@/views/Detail.vue'
+import Stocks from '@/views/Stocks.vue';
+import Detail from '@/views/Detail.vue';
 
-Vue.use(VueRouter)
-Vue.use(BootstrapVue)
+Vue.use(VueRouter);
+Vue.use(BootstrapVue);
 
 const routes: Array<RouteConfig> = [
   {
@@ -25,12 +25,12 @@ const routes: Array<RouteConfig> = [
     name: 'detail',
     component: Detail
   },
-]
+];
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
-})
+});
 
-export default router
+export default router;

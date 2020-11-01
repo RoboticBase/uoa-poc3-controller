@@ -1,14 +1,14 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from 'vue';
+import Vuex from 'vuex';
 
-import {StockType, StateType} from '@/types'
-import {defaultStocks} from '@/initials'
+import { StockType, StateType } from '@/types';
+import { defaultStocks } from '@/initials';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 const state: StateType = {
   stocks: [],
-}
+};
 
 export default new Vuex.Store({
   state: state,
@@ -35,4 +35,4 @@ export default new Vuex.Store({
   },
   modules: {
   }
-})
+});

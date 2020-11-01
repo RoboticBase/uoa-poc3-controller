@@ -21,9 +21,9 @@
 <script lang="ts">
 import Vue from 'vue';
 
-import Header from '@/components/Header.vue'
-import SubTitle from '@/components/SubTitle.vue'
-import {StockType, isStock} from '@/types';
+import Header from '@/components/Header.vue';
+import SubTitle from '@/components/SubTitle.vue';
+import { StockType, isStock } from '@/types';
 
 export type DataType = {
   reservation: number;
@@ -37,8 +37,8 @@ export default Vue.extend({
   },
   data(): DataType {
     return {
-      reservation: 0
-    }
+      reservation: 0,
+    };
   },
   computed: {
     stock(): StockType {
@@ -59,9 +59,9 @@ export default Vue.extend({
   },
   methods: {
     reserve(): void {
-      this.stock.reservation = this.reservation
-      this.$store.commit('updateStock', {idx: this.idx, stock: this.stock})
-      this.$router.push({name: 'stocks'})
+      this.stock.reservation = this.reservation;
+      this.$store.commit('updateStock', {idx: this.idx, stock: this.stock});
+      this.$router.push({name: 'stocks'});
     }
   },
 });
