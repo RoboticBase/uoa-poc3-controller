@@ -1,15 +1,39 @@
-export type StockType = {
+export type ItemType = {
   id: number;
   title: string;
-  category: string;
   image: string;
-  quantity: number;
-  price: number;
+  category: string;
   reservation: number;
 };
 
-export type StateType= {
+export type StockType = ItemType & {
+  quantity: number;
+  price: number;
+};
+
+export type DestinationType = {
+  id: number;
+  name: string;
+  planId: string;
+  robotId: string;
+};
+
+export type PayloadType = {
+  orderDate: string;
+  robotId: string;
+  planId: string;
+  destination: DestinationType;
+  items: Array<ItemType>;
+  success: () => void;
+  failure: (messag: string) => void;
+};
+
+export type StateType = {
   stocks: Array<StockType>;
+  destinations: Array<DestinationType>;
+  selectedDestination: DestinationType;
+  processing: boolean;
+  ordered: Array<PayloadType>;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

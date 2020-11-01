@@ -7,6 +7,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 import Stocks from '@/views/Stocks.vue';
 import Detail from '@/views/Detail.vue';
 import Cart from '@/views/Cart.vue';
+import Ordered from '@/views/Ordered.vue';
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
@@ -30,6 +31,11 @@ const routes: Array<RouteConfig> = [
     path: '/cart',
     name: 'cart',
     component: Cart
+  },
+  {
+    path: '/ordered',
+    name: 'ordered',
+    component: Ordered
   },
 ];
 

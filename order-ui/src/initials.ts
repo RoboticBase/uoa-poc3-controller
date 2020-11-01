@@ -1,4 +1,4 @@
-import {StockType} from '@/types';
+import { StockType, DestinationType} from '@/types';
 
 export const defaultStocks: Array<StockType> = [
   {
@@ -72,5 +72,20 @@ export const defaultStocks: Array<StockType> = [
     quantity: 21,
     price: 110,
     reservation: 0,
+  },
+];
+
+export const defaultDestinations: Array<DestinationType> = [
+  {
+    id: 0,
+    name: "ガレージ3",
+    planId: "plan01",
+    robotId: "robot01",
+  },
+  {
+    id: 1,
+    name: "ガレージ2",
+    planId: "plan01",
+    robotId: "robot01",
   },
 ];
