@@ -34,6 +34,8 @@ export type StateType = {
   selectedDestination: DestinationType;
   processing: boolean;
   ordered: Array<PayloadType>;
+  message: string;
+  variant: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

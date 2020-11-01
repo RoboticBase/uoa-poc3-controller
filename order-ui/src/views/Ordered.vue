@@ -20,6 +20,7 @@
         </div>
       </div>
     </div>
+    <Alert/>
   </div>
 </template>
 
@@ -29,12 +30,14 @@ import { mapGetters } from 'vuex';
 
 import Header from '@/components/Header.vue';
 import SubTitle from '@/components/SubTitle.vue';
+import Alert from '@/components/Alert.vue';
 
 export default Vue.extend({
   name: 'ordered',
   components: {
     Header,
-    SubTitle
+    SubTitle,
+    Alert,
   },
   computed: {
     ...mapGetters(['lastOrdered']),

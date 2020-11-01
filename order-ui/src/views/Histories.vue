@@ -17,6 +17,7 @@
         </b-collapse>
       </b-card>
     </div>
+    <Alert/>
   </div>
 </template>
 
@@ -26,12 +27,14 @@ import { mapGetters } from 'vuex'
 
 import Header from '@/components/Header.vue';
 import SubTitle from '@/components/SubTitle.vue';
+import Alert from '@/components/Alert.vue';
 
 export default Vue.extend({
   name: 'histories',
   components: {
     Header,
-    SubTitle
+    SubTitle,
+    Alert,
   },
   computed: {
     ...mapGetters(['ordered']),

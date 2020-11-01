@@ -12,6 +12,8 @@ const state: StateType = {
   selectedDestination: defaultDestinations[0],
   processing: false,
   ordered: [],
+  message: '',
+  variant: '',
 };
 
 export default new Vuex.Store({
@@ -40,8 +42,8 @@ export default new Vuex.Store({
     },
 
     updateMessage(state: StateType, val: {message: string; variant: string}) {
-      // FIX ME
-      console.log('message=', val.message, val.variant);
+      state.message = val.message;
+      state.variant = val.variant;
     },
 
     addOrdered(state: StateType, ordered: PayloadType): void {
@@ -80,6 +82,8 @@ export default new Vuex.Store({
     processing: (state: StateType): boolean => state.processing,
     lastOrdered: (state: StateType): PayloadType => state.ordered.slice(-1)[0],
     ordered: (state: StateType): Array<PayloadType> => state.ordered,
+    message: (state: StateType): string => state.message,
+    variant: (state: StateType): string => state.variant,
   },
   modules: {
   }

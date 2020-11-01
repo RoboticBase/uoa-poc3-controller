@@ -19,6 +19,7 @@
         </div>
       </div>
     </div>
+    <Alert/>
   </div>
 </template>
 
@@ -27,11 +28,13 @@ import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 
 import Header from '@/components/Header.vue';
+import Alert from '@/components/Alert.vue';
 
 export default Vue.extend({
   name: 'Stocks',
   components: {
-    Header
+    Header,
+    Alert,
   },
   created(): void {
     this.listStocksAction();

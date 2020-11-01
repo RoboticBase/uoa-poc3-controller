@@ -18,6 +18,7 @@
     <div v-if="items.length > 0">
       <Shipping/>
     </div>
+    <Alert/>
   </div>
 </template>
 
@@ -28,6 +29,7 @@ import { mapGetters } from 'vuex';
 import Header from '@/components/Header.vue';
 import SubTitle from '@/components/SubTitle.vue';
 import Shipping from '@/components/Shipping.vue';
+import Alert from '@/components/Alert.vue';
 import { StockType } from '@/types';
 
 export default Vue.extend({
@@ -35,7 +37,8 @@ export default Vue.extend({
   components: {
     Header,
     SubTitle,
-    Shipping
+    Shipping,
+    Alert,
   },
   computed: {
     ...mapGetters(['stocks']),

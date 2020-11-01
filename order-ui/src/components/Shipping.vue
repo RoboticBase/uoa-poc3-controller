@@ -62,15 +62,15 @@ export default Vue.extend({
             this.$router.push({name: 'ordered'});
           },
           failure: (message: string): void => {
-            this.$store.commit('updateMessage', {message: message, variant: 'danger'})
+            this.$store.commit('updateMessage', {message: message, variant: 'danger'});
             this.$store.commit('updateProcessing', false);
           },
         };
-        this.$store.commit('updateMessage', {message: '処理中', variant: 'info'})
+        this.$store.commit('updateMessage', {message: '処理中', variant: 'info'});
         this.$store.commit('updateProcessing', true);
-        this.postShipmentAction(payload)
+        this.postShipmentAction(payload);
       } else {
-        this.$store.commit('updateMessage', {message: 'お届け先と商品を選択してください', variant: 'warning'})
+        this.$store.commit('updateMessage', {message: 'お届け先と商品を選択してください', variant: 'warning'});
       }
     },
   },

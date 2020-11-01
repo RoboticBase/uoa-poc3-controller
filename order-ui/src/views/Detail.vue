@@ -15,6 +15,7 @@
         </div>
       </div>
     </div>
+    <Alert/>
   </div>
 </template>
 
@@ -23,6 +24,7 @@ import Vue from 'vue';
 
 import Header from '@/components/Header.vue';
 import SubTitle from '@/components/SubTitle.vue';
+import Alert from '@/components/Alert.vue';
 import { StockType, isStock } from '@/types';
 
 export type DataType = {
@@ -34,6 +36,7 @@ export default Vue.extend({
   components: {
     Header,
     SubTitle,
+    Alert,
   },
   data(): DataType {
     return {
