@@ -1,7 +1,7 @@
 <template>
   <div class="header container">
     <b-navbar>
-      <b-navbar-brand>UOA-POC3</b-navbar-brand>
+      <b-navbar-brand :to="{ name: 'stocks'}">UOA-POC3</b-navbar-brand>
       <b-navbar-nav class="ml-auto">
         <b-nav-form right>
           <b-button variant="outline-dark" class="btn-sm cart" :to="{ name: 'cart' }">カート</b-button>
