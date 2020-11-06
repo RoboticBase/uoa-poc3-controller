@@ -22,12 +22,12 @@ class Potential:
     def initial(self):
         return np.array(Image.new('L', self.size, color=MIN_POTENTIAL))
 
-    @property
-    def current_field(self):
-        if len(self.potentials.values()) == 0:
+    def get_current_field(self, ignore_id=None):
+        fields = [v['field'] for k, v in self.potentials.items() if ignore_id is None or k != ignore_id]
+        if len(fields) == 0:
             return self.initial
         else:
-            return np.minimum.reduce([v['field'] for v in self.potentials.values()])
+            return np.minimum.reduce(fields)
 
     def register(self, id, path, radius):
         field = self._calc_potential(path, radius)
@@ -59,7 +59,7 @@ class Potential:
 
     def notify_pos(self, id, c_x, c_y, infration_radius):
         radius = infration_radius/self.resolution
-        self.potentials[f'{id}_pos'] = {
+        self.potentials[f'{id}{const.POS_POSTFIX}'] = {
             'field': self._calc_point(c_x, c_y, radius)
         }
 

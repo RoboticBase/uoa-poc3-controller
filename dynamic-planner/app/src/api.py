@@ -92,7 +92,8 @@ class DynamicRoutePlanner(MethodView):
                 self.graph_size,
                 radius)
 
-            searched_path = fast_astar.calculate(self.potential.current_field)
+            ignore_id = f'{req.robot_id}{const.POS_POSTFIX}'
+            searched_path = fast_astar.calculate(self.potential.get_current_field(ignore_id=ignore_id))
 
             if not searched_path:
                 req.state = ReqState.RETRY
@@ -157,7 +158,7 @@ class PotentialViewer(MethodView):
         logger.debug('PotentialViewer.get')
 
         output = io.BytesIO()
-        Image.fromarray(self.potential.current_field).save(output, format='JPEG')
+        Image.fromarray(self.potential.get_current_field()).save(output, format='JPEG')
 
         response = make_response()
         response.data = output.getvalue()
