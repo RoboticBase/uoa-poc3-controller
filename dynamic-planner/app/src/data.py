@@ -1,5 +1,7 @@
+from datetime import datetime
 from dataclasses import dataclass, field
-from enum import Enum, auto
+from enum import Enum
+import hashlib
 
 from src import const
 
@@ -34,8 +36,10 @@ class Edge:
 
 
 class ReqState(Enum):
-    NEW = auto()
-    RETRY = auto()
+    NEW = 'new'
+    DONE = 'done'
+    RETRY = 'retry'
+    DELETE = 'delete'
 
 
 @dataclass
@@ -46,6 +50,27 @@ class Req:
     dest_angle: str
     inflation_radius: float
     state: ReqState = ReqState.NEW
+    created: str = ''
+    id: str = ''
+
+    def __post_init__(self):
+        if not self.created:
+            self.created = datetime.now(const.TIMEZONE).isoformat(timespec='milliseconds')
+        s = f'{self.robot_id}\t{self.start_node}\t{self.dest_node}\t{self.dest_angle}\t{self.inflation_radius}\t{self.created}'
+        self.id = hashlib.md5(s.encode()).hexdigest()
+
+    @property
+    def json(self):
+        return {
+            'id': self.id,
+            'robot_id': self.robot_id,
+            'startNode': self.start_node,
+            'dest_node': self.dest_node,
+            'dest_angle': self.dest_angle,
+            'inflation_radius': self.inflation_radius,
+            'created': self.created,
+            'state': self.state.value,
+        }
 
 
 class Mode(Enum):

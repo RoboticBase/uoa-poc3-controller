@@ -26,16 +26,48 @@ logger = getLogger(__name__)
 class DynamicRoutePlanner(MethodView):
     NAME = 'dynamic_route_planner'
 
-    def __init__(self, potential, req_queue, graph_size, nodes, edges):
+    def __init__(self, potential, req_queue, plan_holder, graph_size, nodes, edges):
         super().__init__()
         self.potential = potential
         self.req_queue = req_queue
+        self.plan_holder = plan_holder
         self.graph_size = graph_size
         self.nodes = nodes
         self.edges = edges
         threading.Thread(target=self._exec).start()
 
-    def post(self):
+    def get(self, plan_id):
+        logger.debug(f'DynamicRoutePlanner.get, plan_id={plan_id}')
+        if plan_id is None:
+            return jsonify([req.json for req in self.plan_holder.values()])
+
+        if self.plan_holder.get(plan_id):
+            return jsonify(self.plan_holder[plan_id].json)
+
+        abort(404, {
+            'result': 'failure',
+            'message': f'plan ({plan_id}) does not found',
+        })
+
+    def delete(self, plan_id):
+        logger.debug(f'DynamicRoutePlanner.delete, plan_id={plan_id}')
+
+        if plan_id is None or not self.plan_holder.get(plan_id):
+            abort(404, {
+                'result': 'failure',
+                'message': f'plan ({plan_id}) does not found',
+            })
+
+        if self.plan_holder[plan_id].state in (ReqState.DONE, ReqState.DELETE):
+            abort(409, {
+                'result': 'failure',
+                'message': f'plan ({plan_id}) has already been done or deleted',
+            })
+
+        self.plan_holder[plan_id].state = ReqState.DELETE
+        return make_response('', 204)
+
+    def post(self, **kwargs):
         logger.debug('DynamicRoutePlanner.post')
         body = request.json
 
@@ -70,21 +102,25 @@ class DynamicRoutePlanner(MethodView):
             inflation_radius = float(entity['robotSize']['value']['inflation_radius'])
 
         req = Req(robot_id, start_node, dest_node, dest_angle, inflation_radius)
+        self.plan_holder[req.id] = req
         self.req_queue.put(req)
 
-        msg = f'enqueued this request, {req}'
-        logger.info(f'status=200, {msg}')
+        logger.info(f'status=200, enqueued request = {req}')
         return jsonify({
             'result': 'success',
-            'message': msg,
+            'enqueued': req.json,
         })
 
     def _exec(self):
         while True:
             req = self.req_queue.get()
-            logger.debug(f'DynamicRoutePlanner._exec, queue_length={self.req_queue.qsize()} req={req}')
+            logger.debug(f'DynamicRoutePlanner._exec get queue ,req={req}')
             if req.state == ReqState.RETRY:
                 time.sleep(const.RETRY_QUEUE_WAIT_SEC)
+
+            if req.state == ReqState.DELETE:
+                logger.debug(f'DynamicRoutePlanner._exec delete queue ,req={req}')
+                continue
 
             radius = req.inflation_radius/float(const.COSTMAP_METADATA['resolution'])
 
@@ -99,8 +135,10 @@ class DynamicRoutePlanner(MethodView):
             searched_path = fast_astar.calculate(self.potential.get_current_field(ignore_id=ignore_id))
 
             if not searched_path:
-                req.state = ReqState.RETRY
-                self.req_queue.put(req)
+                if req.state != ReqState.DELETE:
+                    logger.debug(f'DynamicRoutePlanner._exec reput queue ,req={req}')
+                    req.state = ReqState.RETRY
+                    self.req_queue.put(req)
                 continue
 
             self.potential.register(req.robot_id, searched_path, radius)
@@ -108,6 +146,7 @@ class DynamicRoutePlanner(MethodView):
             payload = self._make_cmd(req.inflation_radius, searched_path, req.dest_angle)
 
             result = orion.send_command(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, req.robot_id, payload)
+            req.state = ReqState.DONE
             logger.info(f'send a "{const.START_COMMAND}" command to orion, '
                         f'result_status={result.status_code}, payload={json.dumps(payload)}')
 
