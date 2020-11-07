@@ -1,6 +1,7 @@
 import datetime
 import io
 import json
+import math
 import threading
 import time
 from textwrap import dedent
@@ -9,6 +10,8 @@ from logging import getLogger
 
 from flask import jsonify, request, abort, make_response
 from flask.views import MethodView
+
+import numpy as np
 
 from PIL import Image
 
@@ -36,8 +39,8 @@ class DynamicRoutePlanner(MethodView):
         logger.debug('DynamicRoutePlanner.post')
         body = request.json
 
-        if body is None or body.get('robotId') is None or body.get('startNode') is None or body.get('destNode') is None:
-            msg = f'"robotId" and/or "startNode" and/or "destNode" do not exist, body={body}'
+        if body is None or body.get('robotId') is None or body.get('destNode') is None:
+            msg = f'"robotId" and/or "destNode" do not exist, body={body}'
             logger.warning(f'status=400, {msg}')
             abort(400, {
                 'result': 'failure',
@@ -45,9 +48,9 @@ class DynamicRoutePlanner(MethodView):
             })
 
         robot_id = body['robotId']
-        start_node = body['startNode']
         dest_node = body['destNode']
         dest_angle = body.get('destAngle')
+        start_node = self._calc_start_node(robot_id, body.get('startNode'))
 
         if self.potential.has_potential(robot_id):
             msg = f'this robot ({robot_id}) already has potential'
@@ -146,6 +149,31 @@ class DynamicRoutePlanner(MethodView):
         }
         return payload
 
+    def _calc_start_node(self, robot_id, start_node):
+        if start_node is not None:
+            return start_node
+
+        entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id)
+        if 'pose' not in entity or 'point' not in entity['pose']['value']:
+            msg = f'the pose of robot ({robot_id}) has not been notified yet and "startNode" does not exist'
+            logger.warning(f'status=400, {msg}')
+            abort(400, {
+                'result': 'failure',
+                'message': msg,
+            })
+
+        point = entity['pose']['value']['point']
+        return self._find_nearest_node(point['x'], point['y'])
+
+    def _find_nearest_node(self, c_x, c_y):
+        dtype = [('name', f'U{const.NODE_NAME_LENGTH}'), ('distance', 'f8')]
+
+        def calc_distance(arr):
+            return np.array((arr[0], math.sqrt((arr[1].c_x - c_x)**2 + (arr[1].c_y - c_y)**2)), dtype=dtype)
+
+        distances = np.apply_along_axis(calc_distance, 1, np.array(list(self.nodes.items())))
+        return np.sort(distances, order='distance')[0][0]
+
 
 class PotentialViewer(MethodView):
     NAME = 'potential_viewer'
@@ -243,7 +271,7 @@ class GraphGenerator(MethodView):
         map_pgm = request.files['map_pgm']
 
         if 'metadata_json' not in request.files:
-            msg = 'yaml_file does not exist'
+            msg = 'metadata_json does not exist'
             logger.warning(msg)
             return jsonify({
                 'result': 'failure',
@@ -256,7 +284,10 @@ class GraphGenerator(MethodView):
         grid = Grid(map_pgm, metadata_json, u_length_m)
         graph = grid.build_graph()
 
-        nodes = {f'N{i:04}': Node(x=vertex.pixel[0], y=vertex.pixel[1], c_x=vertex.converted[0], c_y=vertex.converted[1])
+        nodes = {f'N{str(i).zfill(const.NODE_NAME_LENGTH - 1)}': Node(x=vertex.pixel[0],
+                                                                      y=vertex.pixel[1],
+                                                                      c_x=vertex.converted[0],
+                                                                      c_y=vertex.converted[1])
                  for i, vertex in enumerate(graph.keys())}
 
         raw_edges = list()
