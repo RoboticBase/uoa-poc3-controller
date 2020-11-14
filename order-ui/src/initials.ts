@@ -89,3 +89,10 @@ export const defaultDestinations: Array<DestinationType> = [
     robotId: "robot01",
   },
 ];
+
+export const homeDestination: DestinationType = {
+  id: 9,
+  name: "ホーム",
+  planId: "plan01r",
+  robotId: "robot01",
+};

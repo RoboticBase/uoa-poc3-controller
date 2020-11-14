@@ -10,12 +10,12 @@ iso8601() {
 }
 
 # delete entities
-EXISTING_PLANS=$(curl -sS -H "Fiware-Service: ${FIWARE_SERVICE}" -H "Fiware-Servicepath: ${FIWARE_SERVICEPATH}" "http://localhost:1026/v2/entities/?type={type}&limit=1000&attrs=id")
+EXISTING_PLANS=$(curl -sS -H "Fiware-Service: ${FIWARE_SERVICE}" -H "Fiware-Servicepath: ${FIWARE_SERVICEPATH}" "http://localhost:1026/v2/entities/?type=${type}&limit=1000&attrs=id")
 LEN=$(echo ${EXISTING_PLANS} | jq length)
 count=0
 if [ ${LEN} -gt 0 ]; then
   for i in $(seq 0 $((${LEN} - 1))); do
-    id=$(echo ${EXISTING_PLACES} | jq .[${i}].id -r)
+    id=$(echo ${EXISTING_PLANS} | jq .[${i}].id -r)
     echo "${id} will be deleted."
     curl -i -H "Fiware-Service: ${FIWARE_SERVICE}" -H "Fiware-Servicepath: ${FIWARE_SERVICEPATH}" "http://localhost:1026/v2/entities/${id}/?type=${type}" -X DELETE
     let ++count
@@ -85,7 +85,28 @@ PLANS=$(cat << __EOD__
         "speed": null
       }
     ]
+  },
+  {
+    "plan_id": "plan01r",
+    "waypoints": [
+      {
+        "point": {
+          "altitude": 0,
+          "latitude": 12.34567890,
+          "longitude": 987.65432109
+        },
+        "angle": {
+          "theta": 90
+        },
+        "speed": null,
+        "metadata": {
+          "delay": 120,
+          "map": 1
+        }
+      }
+    ]
   }
+
 ]
 __EOD__
 )

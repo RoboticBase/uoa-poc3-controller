@@ -9,6 +9,7 @@ import Detail from '@/views/Detail.vue';
 import Cart from '@/views/Cart.vue';
 import Ordered from '@/views/Ordered.vue';
 import Histories from '@/views/Histories.vue';
+import Received from '@/views/Received.vue';
 
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
@@ -43,10 +44,15 @@ const routes: Array<RouteConfig> = [
     name: 'histories',
     component: Histories
   },
+  {
+    path: '/received',
+    name: 'received',
+    component: Received
+  }
 ];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.VUE_APP_BASE_URL || '/',
   routes
 });
