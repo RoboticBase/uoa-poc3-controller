@@ -3,7 +3,7 @@ import { join } from '@fireflysemantics/join';
 
 import { PayloadType } from '@/types';
 
-const origin = process.env.VUE_APP_APIHOST;
+const origin = process.env.VUE_APP_APIHOST || 'http://localhost:3000';
 const token = process.env.VUE_APP_APITOKEN || 'dummyToken';
 const plannerPath = '/api/v1/planning';
 
