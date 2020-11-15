@@ -13,7 +13,7 @@ from flask.views import MethodView
 
 import numpy as np
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from src import const, orion
 from src.fast_astar import FastAstar
@@ -216,22 +216,38 @@ class DynamicRoutePlanner(MethodView):
 
 class PotentialViewer(MethodView):
     NAME = 'potential_viewer'
+    BG_COLOR = (255, 255, 255)
+    GRAPH_COLOR = (255, 51, 51)
+    NODE_R = 2
 
-    def __init__(self, potential):
+    def __init__(self, potential, graph_size, nodes, edges):
         super().__init__()
         self.potential = potential
+        self.grid = self._make_grid(graph_size, nodes, edges)
 
     def get(self):
         logger.debug('PotentialViewer.get')
 
         output = io.BytesIO()
-        Image.fromarray(self.potential.get_current_field()).save(output, format='JPEG')
+        potential_img = Image.fromarray(self.potential.get_current_field())
+        Image.composite(self.grid, potential_img.convert('RGB'), potential_img).save(output, format='JPEG')
 
         response = make_response()
         response.data = output.getvalue()
         response.mimetype = 'image/jpeg'
 
         return response
+
+    def _make_grid(self, graph_size, nodes, edges):
+        img = Image.new('RGB', graph_size, color=PotentialViewer.BG_COLOR)
+        draw = ImageDraw.Draw(img)
+        for node in nodes.values():
+            p = (node.x - PotentialViewer.NODE_R, node.y - PotentialViewer.NODE_R,
+                 node.x + PotentialViewer.NODE_R, node.y + PotentialViewer.NODE_R)
+            draw.ellipse(p, fill=PotentialViewer.GRAPH_COLOR)
+        for edge in edges:
+            draw.line((edge.st.as_tuple(), edge.ed.as_tuple()), fill=PotentialViewer.GRAPH_COLOR)
+        return img
 
 
 class PoseNotifiee(MethodView):

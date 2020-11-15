@@ -44,7 +44,7 @@ try:
 
     planner = api.DynamicRoutePlanner.as_view(api.DynamicRoutePlanner.NAME,
                                               potential, req_queue, plan_holder, size, nodes, edges)
-    potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential)
+    potential_viewer = api.PotentialViewer.as_view(api.PotentialViewer.NAME, potential, size, nodes, edges)
     pose_notifiee = api.PoseNotifiee.as_view(api.PoseNotifiee.NAME, potential)
     mode_notifiee = api.ModeNotifiee.as_view(api.ModeNotifiee.NAME, potential, state_holder)
     app.add_url_rule('/api/v1/plans/', defaults={'plan_id': None}, view_func=planner, methods=['GET', 'POST', ])
