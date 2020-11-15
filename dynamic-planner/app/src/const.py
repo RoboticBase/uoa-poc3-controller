@@ -16,6 +16,7 @@ ERROR_MARGIN = float(os.environ.get('ERROR_MARGIN', '1.1'))
 CHECK_WP_LENGTH = int(os.environ.get('CHECK_WP_LENGTH', '3'))
 MODE_CHANGE_COUNT = int(os.environ.get('MODE_CHANGE_COUNT', '3'))
 RETRY_QUEUE_WAIT_SEC = int(os.environ.get('RETRY_QUEUE_QAIT_SEC', '1'))
+GRAPH_MULTIPLY = int(os.environ.get('GRAPH_MULTIPLY', '3'))
 
 # constants
 ORION_BASE_PATH = '/v2/entities/'

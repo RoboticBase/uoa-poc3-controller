@@ -25,6 +25,9 @@ class Node:
     def as_tuple(self):
         return (self.x, self.y)
 
+    def multiply(self, multi):
+        return Node(self.x * multi, self.y * multi, self.c_x * multi, self.c_y * multi)
+
 
 @dataclass
 class Edge:

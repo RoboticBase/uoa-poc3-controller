@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw
 from src import const, orion
 from src.fast_astar import FastAstar
 from src.grid_generator import Grid
-from src.data import ReqState, Req, Mode, State, Node
+from src.data import ReqState, Req, Mode, State, Node, Edge
 
 logger = getLogger(__name__)
 
@@ -214,16 +214,30 @@ class DynamicRoutePlanner(MethodView):
         return np.sort(distances, order='distance')[0][0]
 
 
-class PotentialViewer(MethodView):
-    NAME = 'potential_viewer'
+class GridRedererMixin:
     BG_COLOR = (255, 255, 255)
     GRAPH_COLOR = (255, 51, 51)
     NODE_R = 2
 
+    @classmethod
+    def make_grid(cls, graph_size, nodes, edges):
+        img = Image.new('RGB', graph_size, color=cls.BG_COLOR)
+        draw = ImageDraw.Draw(img)
+        for node in nodes.values():
+            p = (node.x - cls.NODE_R, node.y - cls.NODE_R, node.x + cls.NODE_R, node.y + cls.NODE_R)
+            draw.ellipse(p, fill=cls.GRAPH_COLOR)
+        for edge in edges:
+            draw.line((edge.st.as_tuple(), edge.ed.as_tuple()), fill=cls.GRAPH_COLOR)
+        return img
+
+
+class PotentialViewer(MethodView, GridRedererMixin):
+    NAME = 'potential_viewer'
+
     def __init__(self, potential, graph_size, nodes, edges):
         super().__init__()
         self.potential = potential
-        self.grid = self._make_grid(graph_size, nodes, edges)
+        self.grid = GridRedererMixin.make_grid(graph_size, nodes, edges)
 
     def get(self):
         logger.debug('PotentialViewer.get')
@@ -238,16 +252,32 @@ class PotentialViewer(MethodView):
 
         return response
 
-    def _make_grid(self, graph_size, nodes, edges):
-        img = Image.new('RGB', graph_size, color=PotentialViewer.BG_COLOR)
-        draw = ImageDraw.Draw(img)
-        for node in nodes.values():
-            p = (node.x - PotentialViewer.NODE_R, node.y - PotentialViewer.NODE_R,
-                 node.x + PotentialViewer.NODE_R, node.y + PotentialViewer.NODE_R)
-            draw.ellipse(p, fill=PotentialViewer.GRAPH_COLOR)
-        for edge in edges:
-            draw.line((edge.st.as_tuple(), edge.ed.as_tuple()), fill=PotentialViewer.GRAPH_COLOR)
-        return img
+
+class GraphViewer(MethodView, GridRedererMixin):
+    NAME = 'graph_viewer'
+    FONT_COLOR = (0, 0, 0)
+
+    def __init__(self, graph_size, nodes, edges):
+        super().__init__()
+        self.enlarged_size = [e * const.GRAPH_MULTIPLY for e in graph_size]
+        self.enlarged_nodes = {k: n.multiply(const.GRAPH_MULTIPLY) for k, n in nodes.items()}
+        self.enlarged_edges = [Edge(e.st.multiply(const.GRAPH_MULTIPLY), e.ed.multiply(const.GRAPH_MULTIPLY)) for e in edges]
+
+    def get(self):
+        logger.debug('GraphVieer.get')
+
+        output = io.BytesIO()
+        grid = GridRedererMixin.make_grid(self.enlarged_size, self.enlarged_nodes, self.enlarged_edges)
+        draw = ImageDraw.Draw(grid)
+        for k, n in self.enlarged_nodes.items():
+            draw.text((n.x + GridRedererMixin.NODE_R, n.y + GridRedererMixin.NODE_R), k, fill=GraphViewer.FONT_COLOR)
+        grid.save(output, format='JPEG')
+
+        response = make_response()
+        response.data = output.getvalue()
+        response.mimetype = 'image/jpeg'
+
+        return response
 
 
 class PoseNotifiee(MethodView):
