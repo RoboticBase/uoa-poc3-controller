@@ -48,7 +48,7 @@ class ReqState(Enum):
 @dataclass
 class Req:
     robot_id: str
-    start_node: str
+    start_node: Optional[str]
     dest_node: str
     dest_angle: str
     inflation_radius: float

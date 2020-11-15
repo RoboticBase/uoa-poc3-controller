@@ -82,7 +82,6 @@ class DynamicRoutePlanner(MethodView):
         robot_id = body['robotId']
         dest_node = body['destNode']
         dest_angle = body.get('destAngle')
-        start_node = self._calc_start_node(robot_id, body.get('startNode'))
 
         if self.potential.has_potential(robot_id):
             msg = f'this robot ({robot_id}) already has potential'
@@ -101,7 +100,7 @@ class DynamicRoutePlanner(MethodView):
         else:
             inflation_radius = float(entity['robotSize']['value']['inflation_radius'])
 
-        req = Req(robot_id, start_node, dest_node, dest_angle, inflation_radius)
+        req = Req(robot_id, body.get('startNode'), dest_node, dest_angle, inflation_radius)
         self.plan_holder[req.id] = req
         self.req_queue.put(req)
 
@@ -124,8 +123,18 @@ class DynamicRoutePlanner(MethodView):
 
             radius = req.inflation_radius/float(const.COSTMAP_METADATA['resolution'])
 
+            entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, req.robot_id)
+            start_node = self._calc_start_node(entity, req.start_node)
+
+            if not start_node:
+                if req.state != ReqState.DELETE:
+                    logger.debug(f'DynamicRoutePlanner._exec reput queue ,req={req}')
+                    req.state = ReqState.RETRY
+                    self.req_queue.put(req)
+                continue
+
             fast_astar = FastAstar(
-                self.nodes[req.start_node],
+                self.nodes[start_node],
                 self.nodes[req.dest_node],
                 list(self.nodes.values()),
                 self.graph_size,
@@ -141,9 +150,11 @@ class DynamicRoutePlanner(MethodView):
                     self.req_queue.put(req)
                 continue
 
-            self.potential.register(req.robot_id, searched_path, radius)
+            total_path = self._connect_current_point(entity, searched_path)
 
-            payload = self._make_cmd(req.inflation_radius, searched_path, req.dest_angle)
+            self.potential.register(req.robot_id, total_path, radius)
+
+            payload = self._make_cmd(req.inflation_radius, total_path, req.dest_angle)
 
             result = orion.send_command(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, req.robot_id, payload)
             req.state = ReqState.DONE
@@ -188,18 +199,12 @@ class DynamicRoutePlanner(MethodView):
         }
         return payload
 
-    def _calc_start_node(self, robot_id, start_node):
+    def _calc_start_node(self, entity, start_node):
         if start_node is not None:
             return start_node
 
-        entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id)
         if 'pose' not in entity or 'point' not in entity['pose']['value']:
-            msg = f'the pose of robot ({robot_id}) has not been notified yet and "startNode" does not exist'
-            logger.warning(f'status=400, {msg}')
-            abort(400, {
-                'result': 'failure',
-                'message': msg,
-            })
+            return None
 
         point = entity['pose']['value']['point']
         return self._find_nearest_node(point['x'], point['y'])
@@ -212,6 +217,15 @@ class DynamicRoutePlanner(MethodView):
 
         distances = np.apply_along_axis(calc_distance, 1, np.array(list(self.nodes.items())))
         return np.sort(distances, order='distance')[0][0]
+
+    def _connect_current_point(self, entity, path):
+        if 'pose' not in entity or 'point' not in entity['pose']['value']:
+            return path
+
+        c_x = entity['pose']['value']['point']['x']
+        c_y = entity['pose']['value']['point']['y']
+        x, y = self.potential.convert_pos(c_x, c_y)
+        return [Node(x, y, c_x, c_y)] + path
 
 
 class GridRedererMixin:

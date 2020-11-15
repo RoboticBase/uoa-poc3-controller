@@ -46,11 +46,11 @@ class Potential:
         draw.line([node.as_tuple() for node in path], fill=MAX_POTENTIAL, width=int(potential_radius * 2))
         return np.array(img)
 
-    def _convert_pos(self, c_x, c_y):
+    def convert_pos(self, c_x, c_y):
         return int((c_x - self.o_x)/self.resolution), int(self.height - (c_y - self.o_y)/self.resolution)
 
     def _calc_point(self, c_x, c_y, potential_radius):
-        x, y = self._convert_pos(c_x, c_y)
+        x, y = self.convert_pos(c_x, c_y)
         img = Image.fromarray(self.initial)
         draw = ImageDraw.Draw(img)
         xy = (x - potential_radius, y - potential_radius, x + potential_radius, y + potential_radius)
