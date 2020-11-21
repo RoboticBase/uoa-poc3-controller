@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynamic-route-planner
+  labels:
+    app: dynamic-route-planner
+spec:
+  type: ClusterIP
+  selector:
+    app: dynamic-route-planner
+  ports:
+  - name: dynamic-rp
+    port: 3000
+    targetPort: 3000

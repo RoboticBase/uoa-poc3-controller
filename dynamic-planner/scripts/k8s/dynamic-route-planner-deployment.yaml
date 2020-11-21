@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamic-route-planner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamic-route-planner
+  template:
+    metadata:
+      labels:
+        app: dynamic-route-planner
+    spec:
+      containers:
+      - name: dynamic-route-planner
+        image: uoapoc2020.azurecr.io/roboticbase/dynamic-route-planner:0.1.0
+        imagePullPolicy: Always
+        ports:
+          - name: dynamic-rp
+            containerPort: 3000
+        env:
+        - name: LOG_LEVEL
+          value: "DEBUG"
+        - name: LISTEN_PORT
+          value: "3000"
+        - name: TIMEZONE
+          value: "Asia/Tokyo"
+        - name: ORION_ENDPOINT
+          value: "http://orion:1026"
+        - name: FIWARE_SERVICE
+          value: "uoapoc2020"
+        - name: FIWARE_SERVICEPATH
+          value: "/"
+        - name: GRAPH_MODULE
+          value: "graph.lictia"
+        - name: COSTMAP_METADATA
+          value: '{"resolution":0.05,"width":749,"height":531,"origin":{"point":{"x":-19.3,"y":-20.0,"z":0.0},"angle":{"roll":0.0,"pitch":0.0,"yaw":0.0}}}'
+        - name: ERROR_MARGIN
+          value: "1.1"
+        - name: CHECK_WP_LENGTH
+          value: "3"
+        - name: MODE_CHANGE_COUNT
+          value: "3"
+        - name: RETRY_QUEUE_WAIT_SEC
+          value: "1"
+        - name: GRAPH_MULTIPLY
+          value: "3"
+        - name: ROBOT_TYPE
+          value: "jadrobot"
+        volumeMounts:
+        - name: dynamic-route-graph
+          mountPath: /opt/app/graph/lictia.py
+          subPath: lictia.py
+      volumes:
+      - name: dynamic-route-graph
+        configMap:
+          name: dynamic-route-graph
+
