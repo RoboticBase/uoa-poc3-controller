@@ -17,11 +17,11 @@ CHECK_WP_LENGTH = int(os.environ.get('CHECK_WP_LENGTH', '3'))
 MODE_CHANGE_COUNT = int(os.environ.get('MODE_CHANGE_COUNT', '3'))
 RETRY_QUEUE_WAIT_SEC = int(os.environ.get('RETRY_QUEUE_QAIT_SEC', '1'))
 GRAPH_MULTIPLY = int(os.environ.get('GRAPH_MULTIPLY', '3'))
+ROBOT_TYPE = os.environ.get('ROBOT_TYPE', 'robot')
 
 # constants
 ORION_BASE_PATH = '/v2/entities/'
 ORION_LIST_NUM_LIMIT = 1000
-ROBOT_TYPE = 'robot'
 START_COMMAND = 'navi'
 MODE_NAVI = 'navi'
 MODE_STAQNDBY = 'standby'
