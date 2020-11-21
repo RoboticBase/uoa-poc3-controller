@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static-route-planner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: static-route-planner
+  template:
+    metadata:
+      labels:
+        app: static-route-planner
+    spec:
+      containers:
+      - name: static-route-planner
+        image: uoapoc2020.azurecr.io/roboticbase/static-route-planner:0.1.0
+        imagePullPolicy: Always
+        ports:
+          - name: static-rp
+            containerPort: 3000
+        env:
+        - name: LOG_LEVEL
+          value: "DEBUG"
+        - name: LISTEN_PORT
+          value: "3000"
+        - name: TIMEZONE
+          value: "Asia/Tokyo"
+        - name: ORION_ENDPOINT
+          value: "http://orion:1026"
+        - name: FIWARE_SERVICE
+          value: "uoapoc2020"
+        - name: FIWARE_SERVICEPATH
+          value: "/"
+        - name: CORS_ORIGINS
+          value: "gui.uoa-poc-2020.cloudconductor.jp"
+

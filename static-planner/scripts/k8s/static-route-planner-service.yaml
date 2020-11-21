@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: static-route-planner
+  labels:
+    app: static-route-planner
+spec:
+  type: ClusterIP
+  selector:
+    app: static-route-planner
+  ports:
+  - name: static-rp
+    port: 3000
+    targetPort: 3000
