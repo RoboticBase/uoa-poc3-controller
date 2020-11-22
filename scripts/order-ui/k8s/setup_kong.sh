@@ -2,11 +2,10 @@
 
 . ./.env
 . ./../../kong/k8s/.env
-. ./../../order-ui/k8s/.env
 
-SERVICE_NAME="static-planner-service"
-BACKEND_URL="http://static-route-planner:3000"
-ROUTE_NAME="static-planner-route"
+SERVICE_NAME="order-ui-service"
+BACKEND_URL="http://order-ui"
+ROUTE_NAME="order-ui-route"
 
 # delete existing objedcts
 echo "# delete existing objects"
@@ -30,20 +29,16 @@ echo ""
 echo "# create route: ${ROUTE_NAME}"
 curl -i "http://kong-gateway:8001/services/${SERVICE_NAME}/routes" -X POST \
      --data "name=${ROUTE_NAME}" \
-     --data "hosts[]=${STATIC_PLANNER_DOMAIN}" \
+     --data "hosts[]=${GUI_DOMAIN}" \
      --data "protocols[]=https"
 echo ""
 
 # set plugins
 echo "# set plugins"
 curl -i "http://kong-gateway:8001/routes/${ROUTE_NAME}/plugins" -X POST \
-     --data "name=key-auth" \
-     --data "config.key_names[]=authorization" \
+     --data "name=basic-auth" \
      --data "config.hide_credentials=true"
 curl -i "http://kong-gateway:8001/routes/${ROUTE_NAME}/plugins" -X POST \
      --data "name=acl" \
-     --data "config.whitelist[]=${KEY_CONSUMER}"
-curl -i "http://kong-gateway:8001/routes/${ROUTE_NAME}/plugins" -X POST \
-     --data "name=cors" \
-     --data "config.origins=https://${GUI_DOMAIN}"
+     --data "config.whitelist[]=${BASIC_CONSUMER}"
 

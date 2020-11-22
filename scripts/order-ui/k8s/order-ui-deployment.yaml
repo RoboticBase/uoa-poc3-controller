@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-ui
+  template:
+    metadata:
+      labels:
+        app: order-ui
+    spec:
+      containers:
+      - name: order-ui
+        image: uoapoc2020.azurecr.io/roboticbase/order-ui:0.1.0
+        imagePullPolicy: Always
+        ports:
+          - name: order-ui
+            containerPort: 80
+
