@@ -72,7 +72,7 @@ class DynamicRoutePlanner(MethodView):
         body = request.json
 
         if body is None or body.get('robotId') is None or body.get('destNode') is None:
-            msg = f'"robotId" and/or "destNode" do not exist, body={body}'
+            msg = f'"robotId" and/or "destNode" do not exist (optional "startNode", "destAngle"), body={body}'
             logger.warning(f'status=400, {msg}')
             abort(400, {
                 'result': 'failure',
@@ -245,16 +245,38 @@ class GridRedererMixin:
         return img
 
 
-class PotentialViewer(MethodView, GridRedererMixin):
-    NAME = 'potential_viewer'
+class Potentials(MethodView, GridRedererMixin):
+    NAME = 'potentials'
 
     def __init__(self, potential, graph_size, nodes, edges):
         super().__init__()
         self.potential = potential
         self.grid = GridRedererMixin.make_grid(graph_size, nodes, edges)
 
-    def get(self):
-        logger.debug('PotentialViewer.get')
+    def get(self, potential_id=None):
+        logger.debug('Potentials.get')
+
+        content_type = request.headers.get('Content-Type')
+        accept = request.headers.get('Accept')
+
+        if 'application/json' in (content_type, accept):
+            if potential_id is None:
+                return jsonify([{
+                    'id': k,
+                    'path': [str(n) for n in v['path']] if 'path' in v else []
+                } for k, v in self.potential.potentials.items()])
+
+            if potential_id in self.potential.potentials:
+                v = self.potential.potentials[potential_id]
+                return jsonify({
+                    'id': potential_id,
+                    'path': [str(n) for n in v['path']] if 'path' in v else []
+                })
+
+            abort(404, {
+                'result': 'failure',
+                'message': f'potential ({potential_id}) does not found',
+            })
 
         output = io.BytesIO()
         potential_img = Image.fromarray(self.potential.get_current_field())
@@ -265,6 +287,17 @@ class PotentialViewer(MethodView, GridRedererMixin):
         response.mimetype = 'image/jpeg'
 
         return response
+
+    def delete(self, potential_id):
+        logger.debug(f'Potentials.delete, potential_id={potential_id}')
+        if not self.potential.has_potential(potential_id):
+            abort(404, {
+                'result': 'failure',
+                'message': f'potential ({potential_id}) does not found',
+            })
+
+        self.potential.deregister(potential_id)
+        return make_response('', 204)
 
 
 class GraphViewer(MethodView, GridRedererMixin):
