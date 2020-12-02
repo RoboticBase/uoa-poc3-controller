@@ -72,7 +72,7 @@ class DynamicRoutePlanner(MethodView):
         body = request.json
 
         if body is None or body.get('robotId') is None or body.get('destNode') is None:
-            msg = f'"robotId" and/or "destNode" do not exist (optional "startNode", "destAngle"), body={body}'
+            msg = f"'robotId' and/or 'destNode' do not exist (optional 'startNode', 'destAngle'), body={body}"
             logger.warning(f'status=400, {msg}')
             abort(400, {
                 'result': 'failure',
@@ -80,8 +80,38 @@ class DynamicRoutePlanner(MethodView):
             })
 
         robot_id = body['robotId']
+        start_node = body.get('startNode')
         dest_node = body['destNode']
         dest_angle = body.get('destAngle')
+
+        if not isinstance(robot_id, str):
+            msg = f"'robotId' is not str, robotId={robot_id}"
+            logger.warning(f'status=400, {msg}')
+            abort(400, {
+                'result': 'failure',
+                'message': msg,
+            })
+        if start_node is not None and not self.nodes.get(start_node):
+            msg = f"'startNode' does not exist, destNode={start_node}"
+            logger.warning(f'status=400, {msg}')
+            abort(400, {
+                'result': 'failure',
+                'message': msg,
+            })
+        if not self.nodes.get(dest_node):
+            msg = f"'destNode' does not exist, destNode={dest_node}"
+            logger.warning(f'status=400, {msg}')
+            abort(400, {
+                'result': 'failure',
+                'message': msg,
+            })
+        if dest_angle is not None and not isinstance(dest_angle, (int, float)):
+            msg = f"'destAngle' is not number, destAngle={dest_angle}"
+            logger.warning(f'status=400, {msg}')
+            abort(400, {
+                'result': 'failure',
+                'message': msg,
+            })
 
         if self.potential.has_potential(robot_id):
             msg = f'this robot ({robot_id}) already has potential'
@@ -100,7 +130,7 @@ class DynamicRoutePlanner(MethodView):
         else:
             inflation_radius = float(entity['robotSize']['value']['inflation_radius'])
 
-        req = Req(robot_id, body.get('startNode'), dest_node, dest_angle, inflation_radius)
+        req = Req(robot_id, start_node, dest_node, dest_angle, inflation_radius)
         self.plan_holder[req.id] = req
         self.req_queue.put(req)
 
