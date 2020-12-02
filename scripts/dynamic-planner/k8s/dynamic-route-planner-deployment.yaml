@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: dynamic-route-planner
-        image: uoapoc2020.azurecr.io/roboticbase/dynamic-route-planner:0.1.0
+        image: uoapoc2020.azurecr.io/roboticbase/dynamic-route-planner:0.1.1
         imagePullPolicy: Always
         ports:
           - name: dynamic-rp
