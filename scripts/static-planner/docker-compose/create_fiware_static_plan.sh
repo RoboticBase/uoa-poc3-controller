@@ -29,84 +29,181 @@ PLANS=$(cat << __EOD__
   {
     "plan_id": "plan01",
     "waypoints": [
-      {
-        "point": {
-          "altitude": 0,
-          "latitude": 37.63077812,
-          "longitude": 141.01482954
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307733,
+                "longitude": 141.0148266
+            },
+            "angle": {
+                "theta": 90
+            },
+            "speed": null,
+            "metadata": {
+                "map": "GPS"
+            }
         },
-        "angle": {
-          "theta": 270
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307722,
+                "longitude": 141.0147974
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
         },
-        "speed": null,
-        "metadata": {
-          "delay": 120,
-          "map": 1
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.630874,
+                "longitude": 141.0147982
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6308885,
+                "longitude": 141.01485
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307728,
+                "longitude": 141.0148573
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307733,
+                "longitude": 141.0148264
+            },
+            "angle": {
+                "theta": 90
+            },
+            "speed": null,
+            "metadata": {
+                "delay": 5,
+                "map": "Cartographer"
+            }
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307714,
+                "longitude": 141.0146808
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
         }
-      },
-      {
-        "point": {
-          "altitude": 0,
-          "latitude": 37.6306639,
-          "longitude": 141.0148239
-        },
-        "angle": {
-          "theta": null
-        },
-        "speed": null,
-        "metadata": {
-          "delay": 2
-        }
-      },
-      {
-        "point": {
-          "altitude": 0,
-          "latitude": 37.63077812,
-          "longitude": 141.01482954
-        },
-        "angle": {
-          "theta": 270
-        },
-        "speed": null,
-        "metadata": {
-          "delay": 90,
-          "map": 2
-        }
-      },
-      {
-        "point": {
-          "altitude": 0,
-          "latitude": 37.6307300,
-          "longitude": 141.0149716
-        },
-        "angle": {
-          "theta": null
-        },
-        "speed": null
-      }
     ]
   },
   {
     "plan_id": "plan01r",
     "waypoints": [
-      {
-        "point": {
-          "altitude": 0,
-          "latitude": 12.34567890,
-          "longitude": 987.65432109
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307733,
+                "longitude": 141.0148266
+            },
+            "angle": {
+                "theta": 90
+            },
+            "speed": null,
+            "metadata": {
+                "map": "GPS"
+            }
         },
-        "angle": {
-          "theta": 90
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307722,
+                "longitude": 141.0147974
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
         },
-        "speed": null,
-        "metadata": {
-          "delay": 120,
-          "map": 1
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.630874,
+                "longitude": 141.0147982
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6308885,
+                "longitude": 141.01485
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307728,
+                "longitude": 141.0148573
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307733,
+                "longitude": 141.0148264
+            },
+            "angle": {
+                "theta": 90
+            },
+            "speed": null,
+            "metadata": {
+                "delay": 5,
+                "map": "Cartographer"
+            }
+        },
+        {
+            "point": {
+                "altitude": 0,
+                "latitude": 37.6307714,
+                "longitude": 141.0146808
+            },
+            "angle": {
+                "theta": null
+            },
+            "speed": null
         }
-      }
     ]
   }
-
 ]
 __EOD__
 )
