@@ -17,6 +17,7 @@ ORION_LIST_NUM_LIMIT = 1000
 PLAN_TYPE = 'plan'
 ROBOT_TYPE = 'robot'
 START_COMMAND = 'start'
+STOP_COMMAND = 'stop'
 
 # logging
 LOGGING_JSON = 'logging.json'
