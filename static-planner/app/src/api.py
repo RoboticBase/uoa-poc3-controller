@@ -29,16 +29,31 @@ class StaticRoutePlanner(MethodView):
 
         plan_id = body['planId']
         robot_id = body['robotId']
-        entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.PLAN_TYPE, plan_id)
         payload = self._make_stop_cmd()
         result = orion.send_command(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id, payload)
-
         logger.info(f'send a "{const.STOP_COMMAND}" command to orion, '
                     f'result_status={result.status_code}, payload={json.dumps(payload)}')
 
-        time.sleep(0.1)
+        if const.COMMAND_RESULT_WAIT_ENABLE:
+            for i in range(const.COMMAND_RESULT_WAIT_MAX_NUM):
+                entity = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id)
+                logger.warning(entity['naviCmd_status']['value'])
+                if entity['naviCmd_status']['value'] == const.COMMAND_RESULT_OK:
+                    break
+                logger.debug(f'wait until naviCmd_status is OK, cnt={i}')
+                time.sleep(const.COMMAND_RESULT_WAIT_SEC)
+            else:
+                return jsonify({
+                    'result': 'failure',
+                    'planId': plan_id,
+                    'robotId': robot_id,
+                    'reason': 'naviCmd_satus is still PENDING'
+                }), 409
+        else:
+            time.sleep(const.COMMAND_RESULT_WAIT_SEC)
 
-        payload = self._make_start_cmd(entity['waypoints']['value'])
+        plan = orion.get_entity(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.PLAN_TYPE, plan_id)
+        payload = self._make_start_cmd(plan['waypoints']['value'])
         result = orion.send_command(const.FIWARE_SERVICE, const.FIWARE_SERVICEPATH, const.ROBOT_TYPE, robot_id, payload)
 
         logger.info(f'send a "{const.START_COMMAND}" command to orion, '

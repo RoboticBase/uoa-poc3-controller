@@ -14,8 +14,7 @@ spec:
     spec:
       containers:
       - name: static-route-planner
-        # image: uoapoc2020.azurecr.io/roboticbase/static-route-planner:0.1.0
-        image: uoapoc2020.azurecr.io/roboticbase/static-route-planner:0.1.1
+        image: uoapoc2020.azurecr.io/roboticbase/static-route-planner:0.1.2
         imagePullPolicy: Always
         ports:
           - name: static-rp
@@ -35,4 +34,10 @@ spec:
           value: "/"
         - name: CORS_ORIGINS
           value: "gui.uoa-poc-2020.cloudconductor.jp"
+        - name: COMMAND_RESULT_WAIT_ENABLE
+          value: "True"
+        - name: COMMAND_RESULT_WAIT_SEC
+          value: "0.5"
+        - name: COMMAND_RESULT_WAIT_MAX_NUM
+          value: "100"
 
